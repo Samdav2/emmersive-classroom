@@ -64,7 +64,7 @@ const VRSceneViewerComponent = ({ material, onClose }) => {
     }
   }, [material]);
 
-  // --- FIX 2: Handle A-Frame scene loading robustly ---
+  // --- FIX 2 & AUTOPLAY LOGIC: Handle A-Frame scene loading and VR video playback ---
   // This effect depends on `sceneState` and `ModelComponent`. It sets up the A-Frame listeners.
   useEffect(() => {
     // If it's a 3D model, we consider it loaded and let Suspense handle the rest.
@@ -85,6 +85,35 @@ const VRSceneViewerComponent = ({ material, onClose }) => {
         setLoaded(true);
       };
 
+      // --- NEW: VR Video Playback Control ---
+      // This function is called when the user enters VR mode.
+      const handleEnterVR = () => {
+        console.log('▶️ VR mode entered, attempting to play video.');
+        const videoEl = document.querySelector('#media-asset');
+        // Check if the current scene is a video before trying to play.
+        if (videoEl && sceneState.mediaType === 'video') {
+          // The play() method returns a promise. We'll catch potential errors.
+          videoEl.play().catch(err => {
+            console.error("VR video play failed. User interaction might be required.", err);
+          });
+        }
+      };
+
+      // This function is called when the user exits VR mode.
+      const handleExitVR = () => {
+        console.log('⏸️ VR mode exited, pausing video.');
+        const videoEl = document.querySelector('#media-asset');
+        if (videoEl && sceneState.mediaType === 'video') {
+            videoEl.pause();
+        }
+      };
+
+      // Add event listeners for entering and exiting VR.
+      aframeScene.addEventListener('enter-vr', handleEnterVR);
+      aframeScene.addEventListener('exit-vr', handleExitVR);
+      // --- END NEW ---
+
+
       // --- FIX for race condition ---
       // Check if the scene has already loaded. If so, call the handler immediately.
       // Otherwise, add the event listener.
@@ -94,10 +123,13 @@ const VRSceneViewerComponent = ({ material, onClose }) => {
         aframeScene.addEventListener('loaded', handleSceneLoaded);
       }
 
-      // Cleanup function to remove the event listener on unmount or when dependencies change.
+      // Cleanup function to remove all event listeners on unmount or when dependencies change.
       return () => {
         if (aframeScene) {
           aframeScene.removeEventListener('loaded', handleSceneLoaded);
+          // --- NEW: Cleanup VR event listeners ---
+          aframeScene.removeEventListener('enter-vr', handleEnterVR);
+          aframeScene.removeEventListener('exit-vr', handleExitVR);
         }
       };
     }
@@ -135,7 +167,8 @@ const VRSceneViewerComponent = ({ material, onClose }) => {
             >
               <a-assets timeout="20000">
                 {sceneState.mediaType === 'video' ? (
-                  <video id="media-asset" src={sceneState.mediaUrl} loop autoPlay muted crossOrigin="anonymous" />
+                  // --- MODIFIED: Removed `autoPlay` attribute ---
+                  <video id="media-asset" src={sceneState.mediaUrl} loop muted crossOrigin="anonymous" playsInline />
                 ) : (
                   <img id="media-asset" src={sceneState.mediaUrl} crossOrigin="anonymous" alt="" />
                 )}

@@ -58,8 +58,30 @@ const classroomContent = [
     type: 'image',
     title: 'Architectural Sandbox',
     description: 'A collaborative design space...',
-    mediaUrl: 'https://placehold.co/1920x1080/1a202c/8e9eab?text=360+Architecture+View'
-  }
+    mediaUrl: 'assets/img1.jpg'
+  },
+  {
+    id: 7,
+    type: 'video',
+    title: 'Architectural Sandbox',
+    description: 'A collaborative design space...',
+    mediaUrl: 'assets/vid1.mp4'
+  },
+  {
+    id: 8,
+    type: 'video',
+    title: 'Chemistry Lab',
+    description: 'A collaborative design space...',
+    mediaUrl: 'assets/vid2.mp4'
+  },
+  {
+    id: 8,
+    type: 'video',
+    title: 'Mountain With people',
+    description: 'A collaborative design space...',
+    mediaUrl: 'https://www.youtube.com/embed/xsgS3yOBveY?si=6vi2qkLNtK855sR0'
+  },
+
 ];
 
 const MediaCard = ({ item, onViewVR }) => (
